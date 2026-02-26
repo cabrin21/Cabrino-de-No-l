@@ -1,0 +1,11 @@
+<h2>Ajouter ami</h2>
+
+<input id="f">
+<button onclick="add()">Ajouter</button>
+
+<script>
+function add(){
+fetch("/addFriend",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({from:localStorage.user,to:f.value})});
+}
+</script>
