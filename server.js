@@ -7,52 +7,106 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-const USERS_FILE = "users.json";
-const POSTS_FILE = "posts.json";
+const db = [
+"users.json",
+"posts.json",
+"messages.json",
+"friends.json",
+"stories.json",
+"photos.json",
+"notifications.json"
+];
 
-// créer fichiers si inexistants
-if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, "[]");
-if (!fs.existsSync(POSTS_FILE)) fs.writeFileSync(POSTS_FILE, "[]");
-
-// INSCRIPTION
-app.post("/register", (req,res)=>{
-    let users = JSON.parse(fs.readFileSync(USERS_FILE));
-    users.push(req.body);
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users));
-    res.json({status:"ok"});
+db.forEach(file=>{
+ if(!fs.existsSync(file)) fs.writeFileSync(file,"[]");
 });
 
-// LOGIN
+const read = f => JSON.parse(fs.readFileSync(f));
+const write = (f,d)=>fs.writeFileSync(f,JSON.stringify(d,null,2));
+
+app.post("/register",(req,res)=>{
+ let users = read("users.json");
+ users.push(req.body);
+ write("users.json",users);
+ res.json({ok:true});
+});
+
 app.post("/login",(req,res)=>{
-    let users = JSON.parse(fs.readFileSync(USERS_FILE));
-    let user = users.find(u=>u.email==req.body.email && u.password==req.body.password);
-    res.json(user ? {status:"ok"} : {status:"error"});
+ let users = read("users.json");
+ let u = users.find(x=>x.email==req.body.email && x.password==req.body.password);
+ res.json(u?{ok:true}:{ok:false});
 });
 
-// PUBLIER
 app.post("/post",(req,res)=>{
-    let posts = JSON.parse(fs.readFileSync(POSTS_FILE));
-    posts.unshift({
-        user:req.body.user,
-        text:req.body.text,
-        likes:0
-    });
-    fs.writeFileSync(POSTS_FILE, JSON.stringify(posts));
-    res.json({status:"posted"});
+ let posts = read("posts.json");
+ posts.unshift({
+  user:req.body.user,
+  text:req.body.text,
+  likes:0,
+  comments:[]
+ });
+ write("posts.json",posts);
+ res.json({ok:true});
 });
 
-// VOIR POSTS
-app.get("/posts",(req,res)=>{
-    let posts = JSON.parse(fs.readFileSync(POSTS_FILE));
-    res.json(posts);
-});
+app.get("/posts",(req,res)=>res.json(read("posts.json")));
 
-// LIKE
 app.post("/like",(req,res)=>{
-    let posts = JSON.parse(fs.readFileSync(POSTS_FILE));
-    posts[req.body.index].likes++;
-    fs.writeFileSync(POSTS_FILE, JSON.stringify(posts));
-    res.json({status:"liked"});
+ let p = read("posts.json");
+ p[req.body.index].likes++;
+ write("posts.json",p);
+ res.json({ok:true});
 });
 
-app.listen(3000,()=>console.log("🎄 Cabrino de Noël Social ON"));
+app.post("/comment",(req,res)=>{
+ let p = read("posts.json");
+ p[req.body.index].comments.push({
+  user:req.body.user,
+  text:req.body.text
+ });
+ write("posts.json",p);
+ res.json({ok:true});
+});
+
+app.post("/sendMessage",(req,res)=>{
+ let m = read("messages.json");
+ m.push(req.body);
+ write("messages.json",m);
+ res.json({ok:true});
+});
+
+app.get("/messages",(req,res)=>res.json(read("messages.json")));
+
+app.post("/addFriend",(req,res)=>{
+ let f = read("friends.json");
+ f.push(req.body);
+ write("friends.json",f);
+
+ let n = read("notifications.json");
+ n.push({user:req.body.to,text:req.body.from+" vous a ajouté"});
+ write("notifications.json",n);
+
+ res.json({ok:true});
+});
+
+app.post("/story",(req,res)=>{
+ let s = read("stories.json");
+ s.unshift(req.body);
+ write("stories.json",s);
+ res.json({ok:true});
+});
+
+app.get("/stories",(req,res)=>res.json(read("stories.json")));
+
+app.post("/uploadPhoto",(req,res)=>{
+ let p = read("photos.json");
+ p.unshift(req.body);
+ write("photos.json",p);
+ res.json({ok:true});
+});
+
+app.get("/photos",(req,res)=>res.json(read("photos.json")));
+
+app.get("/notifications",(req,res)=>res.json(read("notifications.json")));
+
+app.listen(3000,()=>console.log("🎄 Cabrino de Noël fonctionne"));
