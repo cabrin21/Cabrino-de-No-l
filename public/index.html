@@ -1,0 +1,36 @@
+<h1>🎄 Cabrino de Noël</h1>
+
+<h3>Créer un compte</h3>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Mot de passe">
+<button onclick="register()">S'inscrire</button>
+
+<h3>Connexion</h3>
+<input id="logEmail" placeholder="Email">
+<input id="logPass" type="password" placeholder="Mot de passe">
+<button onclick="login()">Se connecter</button>
+
+<script>
+function register(){
+fetch("/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({email:email.value,password:pass.value})
+}).then(()=>alert("Compte créé"));
+}
+
+function login(){
+fetch("/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({email:logEmail.value,password:logPass.value})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.status=="ok"){
+localStorage.user=logEmail.value;
+window.location="home.html";
+}else alert("Erreur");
+});
+}
+</script>
