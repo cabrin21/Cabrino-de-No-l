@@ -1,0 +1,24 @@
+<h2>Stories</h2>
+
+<input id="s">
+<button onclick="send()">Poster</button>
+
+<div id="box"></div>
+
+<script>
+function send(){
+fetch("/story",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({user:localStorage.user,text:s.value})}).then(load);
+}
+
+function load(){
+fetch("/stories").then(r=>r.json()).then(data=>{
+box.innerHTML="";
+data.forEach(s=>{
+box.innerHTML+=`<p>${s.user}: ${s.text}</p>`;
+});
+});
+}
+
+load();
+</script>
