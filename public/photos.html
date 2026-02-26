@@ -1,0 +1,24 @@
+<h2>Photos</h2>
+
+<input id="url">
+<button onclick="upload()">Poster</button>
+
+<div id="gal"></div>
+
+<script>
+function upload(){
+fetch("/uploadPhoto",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({user:localStorage.user,url:url.value})}).then(load);
+}
+
+function load(){
+fetch("/photos").then(r=>r.json()).then(data=>{
+gal.innerHTML="";
+data.forEach(p=>{
+gal.innerHTML+=`<img src="${p.url}" width="100">`;
+});
+});
+}
+
+load();
+</script>
