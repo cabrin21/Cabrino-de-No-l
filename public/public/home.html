@@ -1,0 +1,48 @@
+<h2>Accueil</h2>
+
+<textarea id="postText"></textarea>
+<button onclick="post()">Publier</button>
+
+<div id="feed"></div>
+
+<a href="chat.html">Messages</a> |
+<a href="photos.html">Photos</a> |
+<a href="stories.html">Stories</a> |
+<a href="friends.html">Amis</a> |
+<a href="notifs.html">Notifications</a>
+
+<script>
+function load(){
+fetch("/posts").then(r=>r.json()).then(data=>{
+feed.innerHTML="";
+data.forEach((p,i)=>{
+feed.innerHTML+=`
+<div>
+<b>${p.user}</b>
+<p>${p.text}</p>
+<button onclick="like(${i})">❤️ ${p.likes}</button>
+<input id="c${i}">
+<button onclick="comment(${i})">💬</button>
+<div>${p.comments.map(c=>"<p>"+c.user+": "+c.text+"</p>").join("")}</div>
+</div><hr>`;
+});
+});
+}
+
+function post(){
+fetch("/post",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({user:localStorage.user,text:postText.value})}).then(load);
+}
+
+function like(i){
+fetch("/like",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({index:i})}).then(load);
+}
+
+function comment(i){
+fetch("/comment",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({user:localStorage.user,index:i,text:document.getElementById("c"+i).value})}).then(load);
+}
+
+load();
+</script>
