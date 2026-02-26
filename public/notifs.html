@@ -1,0 +1,10 @@
+<h2>Notifications</h2>
+<div id="n"></div>
+
+<script>
+fetch("/notifications").then(r=>r.json()).then(data=>{
+data.forEach(x=>{
+n.innerHTML+=`<p>${x.text}</p>`;
+});
+});
+</script>
