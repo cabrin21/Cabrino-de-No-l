@@ -1,48 +1,108 @@
-<h2>Accueil</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f0f2f5;
+}
 
-<textarea id="postText"></textarea>
+.topbar{
+background:#1877f2;
+color:white;
+padding:15px;
+font-size:20px;
+position:sticky;
+top:0;
+}
+
+.postbox{
+background:white;
+padding:15px;
+margin:10px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+textarea{
+width:100%;
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button{
+background:#1877f2;
+color:white;
+border:none;
+padding:10px;
+border-radius:6px;
+margin-top:5px;
+}
+
+.card{
+background:white;
+padding:15px;
+margin:10px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+🎄 Cabrino de Noël
+</div>
+
+<div class="postbox">
+<textarea id="postText" placeholder="Quoi de neuf ?"></textarea>
 <button onclick="post()">Publier</button>
+</div>
 
 <div id="feed"></div>
 
-<a href="chat.html">Messages</a> |
-<a href="photos.html">Photos</a> |
-<a href="stories.html">Stories</a> |
-<a href="friends.html">Amis</a> |
-<a href="notifs.html">Notifications</a>
-
 <script>
 function load(){
-fetch("/posts").then(r=>r.json()).then(data=>{
+fetch("/posts")
+.then(r=>r.json())
+.then(data=>{
 feed.innerHTML="";
 data.forEach((p,i)=>{
 feed.innerHTML+=`
-<div>
+<div class="card">
 <b>${p.user}</b>
 <p>${p.text}</p>
-<button onclick="like(${i})">❤️ ${p.likes}</button>
-<input id="c${i}">
-<button onclick="comment(${i})">💬</button>
-<div>${p.comments.map(c=>"<p>"+c.user+": "+c.text+"</p>").join("")}</div>
-</div><hr>`;
+<button onclick="like(${i})">👍 ${p.likes}</button>
+</div>`;
 });
 });
 }
 
 function post(){
-fetch("/post",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({user:localStorage.user,text:postText.value})}).then(load);
+fetch("/post",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+user:localStorage.user,
+text:postText.value
+})
+}).then(load);
 }
 
 function like(i){
-fetch("/like",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({index:i})}).then(load);
-}
-
-function comment(i){
-fetch("/comment",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({user:localStorage.user,index:i,text:document.getElementById("c"+i).value})}).then(load);
+fetch("/like",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({index:i})
+}).then(load);
 }
 
 load();
 </script>
+
+</body>
+</html>
