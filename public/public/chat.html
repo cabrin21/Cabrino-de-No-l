@@ -1,0 +1,25 @@
+<h2>Messages</h2>
+
+<input id="to">
+<input id="msg">
+<button onclick="send()">Envoyer</button>
+
+<div id="box"></div>
+
+<script>
+function load(){
+fetch("/messages").then(r=>r.json()).then(data=>{
+box.innerHTML="";
+data.forEach(m=>{
+box.innerHTML+=`<p>${m.from} → ${m.to}: ${m.text}</p>`;
+});
+});
+}
+
+function send(){
+fetch("/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({from:localStorage.user,to:to.value,text:msg.value})}).then(load);
+}
+
+load();
+</script>
